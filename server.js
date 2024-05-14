@@ -28,7 +28,7 @@ const start = () => {
 
 connectToDatabase(start);
 //addUser();
-getUser();
+//getUser();
 
 
 

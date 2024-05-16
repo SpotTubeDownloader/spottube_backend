@@ -1,8 +1,9 @@
 const express = require('express');
-const routes = require('./endpoint');
-const {connectToDatabase, getUser, addUser} = require('./database');
+const {connectToDatabase, getUser, addUser} = require('./Database/database');
 const cors = require('cors');
 const { auth } = require('express-oauth2-jwt-bearer');
+const loginRouter = require('./Routes/login_endpoint');
+const userRouter = require('./Routes/user_endpoint');
 
 require('dotenv').config();
 
@@ -17,7 +18,8 @@ const start = () => {
     app.use(cors());
     app.use(jwtCheck);
     app.use(express.json());
-    app.use('/', routes);
+    app.use('/user', userRouter);
+    app.use('/', loginRouter);
 
     const port = process.env.PORT;
     const host = process.env.HOST;

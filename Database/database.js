@@ -9,6 +9,15 @@ const userSchema = new mongoose.Schema({
     picture: String,
     sub: String
 });
+const songSchema = new mongoose.Schema({
+    songId: String,
+    title: String,
+    artist: String,
+    thumbnail: String,
+    link: String
+});
+
+const songModel = mongoose.model('songs', songSchema);
 const userModel = mongoose.model('users', userSchema);
 
 function connectToDatabase(callback){
@@ -47,12 +56,22 @@ function addUser(user){
     });
 }
 
+function addSongToHistoryUser(song, userSub){
+    const newSong = new songModel(song);
+    
+    userModel.findOneAndUpdate({sub: userSub}, {$push: {history: newSong}}).then(()=>{
+        console.log('Song added');
+    }).catch((err)=>{
+        console.log(err);
+    });
+}
 
 
 
 
 
-module.exports = {connectToDatabase, getUser, addUser, getUserBySub};
+
+module.exports = {connectToDatabase, getUser, addUser, getUserBySub, addSongToHistoryUser};
 
 
 

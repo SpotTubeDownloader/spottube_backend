@@ -9,11 +9,13 @@ userRouter.post('/saerchName', (req, res) => {
         res.send(songs);
     });
 });
-userRouter.post("/downloadSongBySongName", (req, res)=>{
+userRouter.post("/downloadSongBySongName", (req, res) => {
     const songLink = req.body.songLink;
-    downloadSong(songLink, res).then(()=>{
-    console.log("Song downloaded");
-   });
-})
+    downloadSong(songLink, res).then(() => {
+        console.log("Song downloaded");
+    }).catch((error) => {
+        console.log(error);
+    });
+});
 
 module.exports = userRouter;

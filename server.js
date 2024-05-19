@@ -7,6 +7,10 @@ const userRouter = require('./Routes/user_endpoint');
 
 require('dotenv').config();
 
+const corsOptions = {
+    exposedHeaders: 'Authorization',
+  };
+
 const start = () => {
     const jwtCheck = auth({
         audience: 'spottube-certificate',
@@ -15,7 +19,7 @@ const start = () => {
     });
 
     const app = express();
-    app.use(cors());
+    app.use(cors(corsOptions));
     app.use(jwtCheck);
     app.use(express.json());
     app.use('/user', userRouter);

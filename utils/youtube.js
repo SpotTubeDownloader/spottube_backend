@@ -80,15 +80,12 @@ async function downloadSong(songLink, res) {
         ffmpeg(stream)
             .audioBitrate(128)
             .save(filePath)
+            .outputOptions([
+                '-metadata', `title=${metadata.title}`,
+                '-metadata', `artist=${metadata.artist}`
+            ])
             .on('end', ()=>{
-                ffmetadata.write(filePath, metadata, (err) => {
-                    if (err) {
-                        console.error(err);
-                        res.status(500).send('Errore durante la scrittura dei metadati');
-                    }else{
-                        sendFile(songNameOriginal,filePath, res);
-                    }
-                });
+                sendFile(songNameOriginal,filePath, res);
             })
             .on('error', (error) => {
                 console.error(error);

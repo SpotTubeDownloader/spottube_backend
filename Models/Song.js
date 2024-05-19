@@ -7,6 +7,5 @@ class Song {
         this.artist = artist;
     }
 }
-
-
 module.exports = Song;
+

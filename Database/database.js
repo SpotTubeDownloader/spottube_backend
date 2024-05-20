@@ -74,6 +74,7 @@ function addSongToHistoryUser(history){
 
 function getHistory(subUser){
     return historyModel.find({userSub: subUser}).then((history)=>{
+        console.log(history);
         return history;
     }).catch((err)=>{
         console.log(err);

@@ -19,13 +19,15 @@ userRouter.post("/downloadSongBySongName", (req, res) => {
     });
 });
 
-userRouter.get("history", (req,res)=>{
-    const subUser = req.body.sub;
+userRouter.get("/history/:sub", (req,res)=>{
+    const subUser = req.params.sub;
+    console.log(subUser);
     database.getHistory(subUser).then((history)=>{
         res.send(history);
     }).catch((error)=>{
         console.log(error);
     });
 })
+
 
 module.exports = userRouter;

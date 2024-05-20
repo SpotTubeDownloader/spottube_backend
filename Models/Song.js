@@ -1,10 +1,10 @@
 class Song {
     constructor(id, link, thumbnailUrl, title, artist) {
-        this.id = id;
-        this.link = link;
-        this.thumbnailUrl = thumbnailUrl;
+        this.songId = id;
         this.title = title;
         this.artist = artist;
+        this.thumbnail = thumbnailUrl;
+        this.link = link;
     }
 }
 module.exports = Song;

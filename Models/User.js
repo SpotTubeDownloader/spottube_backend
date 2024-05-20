@@ -1,9 +1,10 @@
 class User {
     constructor(user){
-        this.sub = user.sub;
-        this.name = user.name;
         this.email = user.email;
+        this.name = user.name;
+        this.nickname = user.nickname;
         this.picture = user.picture;
+        this.sub = user.sub;
     }
 }
 module.exports = User;

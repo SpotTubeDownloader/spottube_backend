@@ -19,6 +19,7 @@
     "ffmetadata": "^1.7.0",
     "ffmpeg-static": "^5.1.0",
     "fluent-ffmpeg": "^2.1.2",
+    "fs-extra": "^11.2.0",
     "logger": "^0.0.1",
     "mongoose": "^8.3.4",
     "node-html-parser": "^6.1.5",

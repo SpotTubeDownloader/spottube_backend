@@ -1,4 +1,5 @@
 const Song = require('../Models/Song');
+const History = require('../Models/History');
 const axios = require("axios");
 const ytdl = require('ytdl-core');
 const ffmpeg = require("fluent-ffmpeg");
@@ -44,7 +45,7 @@ async function searchSong(songName) {
     }
     return songsList;
 }
-async function downloadSong(songLink, res) {
+async function downloadSong(songLink,subUser ,res) {
     try {
 
         donwloadPath = process.env.CACHE_DIR;
@@ -60,6 +61,8 @@ async function downloadSong(songLink, res) {
         const videoId = songInfo.videoDetails.videoId;
 
         const song = new Song(videoId, songLink, thumbnail, songNameOriginal, artist);
+        const history = new History(song, subUser);
+        database.addSongToHistoryUser(history);
 
         const filePath = path.join(donwloadPath, `${videoId}.mp3`);      
         if (fs.existsSync(filePath)) {

@@ -11,11 +11,21 @@ userRouter.post('/saerchName', (req, res) => {
 });
 userRouter.post("/downloadSongBySongName", (req, res) => {
     const songLink = req.body.songLink;
-    downloadSong(songLink, res).then(() => {
+    const subUser = req.body.sub;
+    downloadSong(songLink,subUser ,res).then(() => {
         console.log("Song downloaded");
     }).catch((error) => {
         console.log(error);
     });
 });
+
+userRouter.get("history", (req,res)=>{
+    const subUser = req.body.sub;
+    database.getHistory(subUser).then((history)=>{
+        res.send(history);
+    }).catch((error)=>{
+        console.log(error);
+    });
+})
 
 module.exports = userRouter;

@@ -4,12 +4,9 @@ const cors = require('cors');
 const { auth } = require('express-oauth2-jwt-bearer');
 const loginRouter = require('./Routes/login_endpoint');
 const userRouter = require('./Routes/user_endpoint');
+const clearCache = require('./utils/cache');
 
 require('dotenv').config();
-
-const corsOptions = {
-    exposedHeaders: 'Authorization',
-  };
 
 const start = () => {
     const jwtCheck = auth({
@@ -19,7 +16,7 @@ const start = () => {
     });
 
     const app = express();
-    app.use(cors(corsOptions));
+    app.use(cors());
     app.use(jwtCheck);
     app.use(express.json());
     app.use('/user', userRouter);
@@ -32,12 +29,5 @@ const start = () => {
     });
 }
 
+setInterval(clearCache, 1000*60*60);
 connectToDatabase(start);
-//addUser();
-//getUser();
-
-
-
-
-
-

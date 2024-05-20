@@ -1,7 +1,7 @@
 class history{
     constructor(song, userSub){
-        this.song = song;
         this.userSub = userSub;
+        this.song = song;
     }
 }
 

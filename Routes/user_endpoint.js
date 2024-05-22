@@ -39,4 +39,21 @@ userRouter.get("/history/:sub", (req,res)=>{
 })
 
 
+userRouter.delete("/history/deleteElementinHistoryBySongId/:sub/:id", (req,res)=>{
+    const songId = req.params.id;
+    const subUser = req.body.sub;
+    database.deleteElementinHistoryBySongId(songId,subUser).then(()=>{
+    database.getHistory(subUser).then((history)=>{
+        res.send(history);
+    }).catch((error)=>{
+        console.log(error);
+    });
+    
+    }).catch((error)=>{
+        console.log(error);
+    });
+});
+
+
+
 module.exports = userRouter;

@@ -19,6 +19,15 @@ userRouter.post("/downloadSongBySongName", (req, res) => {
     });
 });
 
+userRouter.post("/downloadVideoByLink", (req, res) => {
+    const videoLink = req.body.videoLink;
+    const subUser = req.body.sub;
+    downloadSong(videoLink,subUser ,res).then(() => {
+    }).catch((error) => {
+        console.log(error);
+    });
+});
+
 userRouter.get("/history/:sub", (req,res)=>{
     const subUser = req.params.sub;
     console.log(subUser);

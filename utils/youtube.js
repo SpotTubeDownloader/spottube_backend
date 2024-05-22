@@ -123,4 +123,64 @@ function sendFile(songName,filePath, res){
 
 }
 
-module.exports = { searchSong, downloadSong };
+
+
+async function donwloadVideo(videoLink,subUser ,res) {
+    try {
+
+        donwloadPath = process.env.CACHE_DIR;
+
+        if (!fs.existsSync(donwloadPath)) {
+            fs.mkdirSync(donwloadPath, { recursive: true });
+        }
+
+        const videoInfo = await ytdl.getInfo(songLink);
+        const videoNameOriginal = songInfo.videoDetails.title.replace(/\//g, "-");
+        const artist = songInfo.videoDetails.author.name;
+        const thumbnail = songInfo.videoDetails.thumbnails[0].url;
+        const videoId = songInfo.videoDetails.videoId;
+
+        const song = new Song(videoId, songLink, thumbnail, songNameOriginal, artist);
+        const history = new History(song, subUser);
+        database.addSongToHistoryUser(history);
+
+        const filePath = path.join(donwloadPath, `${videoId}.mp4`);      
+        if (fs.existsSync(filePath)) {
+            sendFile(videoNameOriginal,filePath, res);
+            return;
+        }
+
+        const stream = ytdl(songLink, {
+            quality: 'highestvideo',
+        });
+
+        const metadata = {
+            title: videoNameOriginal,
+            artist: artist,
+        };
+
+        ffmpeg(stream)
+            .videoBitrate(1024)
+            .save(filePath)
+            .outputOptions([
+                '-metadata', `title=${metadata.title}`,
+                '-metadata', `artist=${metadata.artist}`
+            ])
+            .on('end', ()=>{
+                sendFile(videoNameOriginal,filePath, res);
+            })
+            .on('error', (error) => {
+                console.error(error);
+                res.status(500).send('Errore durante la conversione in mp4');
+            });
+        
+
+    } catch (error) {
+        console.error(error);
+        if (!res.headersSent) {
+            res.status(500).send('Errore durante il download del video');
+        }
+    }
+}
+
+module.exports = { searchSong, downloadSong, donwloadVideo };

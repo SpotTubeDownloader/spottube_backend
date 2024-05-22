@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const connectionString = process.env.DATABASE_URL;
@@ -74,14 +74,20 @@ function addSongToHistoryUser(history){
 
 function getHistory(subUser){
     return historyModel.find({userSub: subUser}).then((history)=>{
-        const songs = history.map(element => element.song);
+        const songs = history.map(element => element.song).reverse();
         return songs;
     }).catch((err)=>{
         console.log(err);
     });
 }
 
-
+function deleteElementinHistoryBySongId(songId,subUser){
+    historyModel.deleteOne({userSub: subUser, 'song.songId': songId}).then(()=>{
+        console.log('Song deleted');
+    }).catch((err)=>{
+        console.log(err);
+    });
+}
 
 
 

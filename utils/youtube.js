@@ -109,7 +109,7 @@ function sendFile(songName,filePath, res){
     res.set({
         'Content-Type': 'audio/mpeg',
     });
-    res.set("songName", `${songName}`);
+    res.set("songName", `${encodeURIComponent(songName)}`);
 
     res.download(filePath, (err) => {
         if (err) {

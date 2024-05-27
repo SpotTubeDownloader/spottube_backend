@@ -30,7 +30,6 @@ userRouter.post("/downloadVideoByLink", (req, res) => {
 
 userRouter.get("/history/:sub", (req,res)=>{
     const subUser = req.params.sub;
-    console.log(subUser);
     database.getHistory(subUser).then((history)=>{
         res.send(history);
     }).catch((error)=>{
@@ -39,16 +38,18 @@ userRouter.get("/history/:sub", (req,res)=>{
 })
 
 
-userRouter.delete("/history/deleteElementinHistoryBySongId/:sub/:id", (req,res)=>{
-    const songId = req.params.id;
-    const subUser = req.body.sub;
-    database.deleteElementinHistoryBySongId(songId,subUser).then(()=>{
-    database.getHistory(subUser).then((history)=>{
-        res.send(history);
-    }).catch((error)=>{
-        console.log(error);
-    });
-    
+userRouter.post("/history/deleteElementinHistoryBySongId", (req,res)=>{
+    const songId = req.body.songId;
+    const subUser = req.body.subUser;
+    console.log("[Database Delete]: ",songId);
+    console.log("[Database Delete]: ",subUser);
+
+    database.deleteElementinHistoryBySongId(songId,subUser).then((data)=>{
+        database.getHistory(subUser).then((history)=>{
+            res.send(history);
+        }).catch((error)=>{
+            console.log(error);
+        });
     }).catch((error)=>{
         console.log(error);
     });

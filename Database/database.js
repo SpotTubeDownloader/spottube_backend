@@ -1,4 +1,4 @@
- const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 require('dotenv').config();
 
 const connectionString = process.env.DATABASE_URL;
@@ -65,11 +65,14 @@ function addUser(user){
 function addSongToHistoryUser(history){
     console.log(history);
     const newHistoryModel = new historyModel(history);
-    newHistoryModel.save().then(()=>{
-        console.log('Song added to history');
-    }).catch((err)=>{
-        console.log(err);
+    deleteElementinHistoryBySongId(history.song.songId, history.userSub).then(()=>{
+        newHistoryModel.save().then(()=>{
+            console.log('Song added to history');
+        }).catch((err)=>{
+            console.log(err);
+        });
     });
+
 }
 
 function getHistory(subUser){
@@ -82,7 +85,10 @@ function getHistory(subUser){
 }
 
 function deleteElementinHistoryBySongId(songId,subUser){
-    historyModel.deleteOne({userSub: subUser, 'song.songId': songId}).then(()=>{
+    console.log("[Database Delete]: ",songId);
+    console.log("[Database Delete]: ",subUser);
+    return historyModel.deleteOne({userSub: subUser, 'song.songId': songId}).then((data)=>{
+        console.log(data);
         console.log('Song deleted');
     }).catch((err)=>{
         console.log(err);
@@ -91,7 +97,7 @@ function deleteElementinHistoryBySongId(songId,subUser){
 
 
 
-module.exports = {connectToDatabase, getUser, addUser, getUserBySub, addSongToHistoryUser, getHistory};
+module.exports = {connectToDatabase, getUser, addUser, getUserBySub, addSongToHistoryUser, getHistory, deleteElementinHistoryBySongId};
 
 
 

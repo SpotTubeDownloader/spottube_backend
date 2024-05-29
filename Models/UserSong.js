@@ -1,8 +1,8 @@
-class history{
+class userSong{
     constructor(song, userSub){
         this.userSub = userSub;
         this.song = song;
     }
 }
 
-module.exports = history;
+module.exports = userSong;

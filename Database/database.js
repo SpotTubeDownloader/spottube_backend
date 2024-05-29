@@ -19,12 +19,14 @@ const songSchema = new mongoose.Schema({
 
 });
 
-const historySchema = new mongoose.Schema({
+const userSongSchema = new mongoose.Schema({
     userSub: String,
     song: songSchema
 });
-const historyModel = mongoose.model('history', historySchema);
+
+const historyModel = mongoose.model('history', userSongSchema);
 const userModel = mongoose.model('users', userSchema);
+const favoriteModel = mongoose.model('favorites', userSongSchema);
 
 function connectToDatabase(callback){
     mongoose.connect(connectionString).then(()=>{
@@ -35,69 +37,100 @@ function connectToDatabase(callback){
     });
 }
 
-function getUser(){
-    userModel.find().then((users)=>{
-        // console.log(users);
-        return users
-    }).catch((err)=>{
-        console.log(err);
-    });
-}
-function getUserBySub(userSub){
-    return userModel.findOne({sub: userSub}).then((user)=>{
-        // console.log(user);
-        return user ? true : false;
-    }).catch((err)=>{
-        console.log(err);
-    });
+async function getUserBySub(userSub){
+    try{
+        const user = await userModel.findOne({sub: userSub});
+        return user;
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 //create add user function using the userModel and user object
-function addUser(user){
-    const newUser = new userModel(user);
-    newUser.save().then(()=>{
-        console.log('User added');
-    }).catch((err)=>{
-        console.log(err);
-    });
+async function addUser(user){
+    try{
+        const newUser = new userModel(user);
+        await newUser.save();
+    } catch (error) {
+        console.log(error);
+    }
 }
 
-function addSongToHistoryUser(history){
-    console.log(history);
-    const newHistoryModel = new historyModel(history);
-    deleteElementinHistoryBySongId(history.song.songId, history.userSub).then(()=>{
-        newHistoryModel.save().then(()=>{
-            console.log('Song added to history');
-        }).catch((err)=>{
-            console.log(err);
-        });
-    });
-
+async function addSongToHistoryUser(history){
+    try{
+        const newHistoryModel = new historyModel(history);
+        await deleteElementinHistoryBySongId(history.song.songId, history.userSub);
+        await newHistoryModel.save();
+    } catch (error) {
+        console.log(error);
+    }
 }
 
-function getHistory(subUser){
-    return historyModel.find({userSub: subUser}).then((history)=>{
+async function getHistory(subUser){
+    try{
+        history = await historyModel.find({userSub: subUser});
         const songs = history.map(element => element.song).reverse();
         return songs;
-    }).catch((err)=>{
-        console.log(err);
-    });
+    } catch (error) {
+        console.log(error);
+    }
 }
 
-function deleteElementinHistoryBySongId(songId,subUser){
-    console.log("[Database Delete]: ",songId);
-    console.log("[Database Delete]: ",subUser);
-    return historyModel.deleteOne({userSub: subUser, 'song.songId': songId}).then((data)=>{
-        console.log(data);
-        console.log('Song deleted');
-    }).catch((err)=>{
-        console.log(err);
-    });
+async function deleteElementinHistoryBySongId(songId,subUser){
+    try{
+        await historyModel.deleteOne({userSub: subUser, 'song.songId': songId});
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+async function getFavorites(subUser){
+    try{
+        favorites = await favoriteModel.find({userSub: subUser});
+        const songs = favorites.map(element => element.song).reverse();
+        return songs;
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 
+async function addFavorite(favorite){
+    try{
+        const newFavorite = new favoriteModel(favorite);
+        favorite = await favoriteModel.findOne({userSub: favorite.userSub, 'song.songId': favorite.song.songId});
+        if (!favorite){
+            await newFavorite.save();
+            return true;
+        }
+        return false;
+    } catch (error){
+        console.log(error);
+        return false;
+    }
+}
 
-module.exports = {connectToDatabase, getUser, addUser, getUserBySub, addSongToHistoryUser, getHistory, deleteElementinHistoryBySongId};
+
+async function deleteFavoriteBySongId(songId,subUser){
+    try{
+        await favoriteModel.deleteOne({userSub: subUser, 'song.songId': songId});
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+module.exports = {
+    connectToDatabase, 
+    addUser, 
+    getUserBySub, 
+    addSongToHistoryUser, 
+    getHistory, 
+    deleteElementinHistoryBySongId, 
+    addFavorite, 
+    deleteFavoriteBySongId, 
+    getFavorites
+};
 
 
 

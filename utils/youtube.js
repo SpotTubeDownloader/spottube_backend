@@ -1,5 +1,5 @@
 const Song = require('../Models/Song');
-const History = require('../Models/History');
+const userSong = require('../Models/UserSong');
 const axios = require("axios");
 const ytdl = require('ytdl-core');
 const ffmpeg = require("fluent-ffmpeg");
@@ -9,6 +9,16 @@ const path = require("path");
 const fs = require("fs");
 require('dotenv').config();
 
+
+async function getInfo(url){
+    const songInfo = await ytdl.getInfo(url);
+    const songNameOriginal = songInfo.videoDetails.title.replace(/\//g, "-");
+    const artist = songInfo.videoDetails.author.name;
+    const thumbnail = songInfo.videoDetails.thumbnails[0].url;
+    const videoId = songInfo.videoDetails.videoId;
+
+    return new Song(videoId, url, thumbnail, songNameOriginal, artist);
+}
 
 
 async function searchSong(songName) {
@@ -54,19 +64,13 @@ async function downloadSong(songLink,subUser ,res) {
             fs.mkdirSync(donwloadPath, { recursive: true });
         }
 
-        const songInfo = await ytdl.getInfo(songLink);
-        const songNameOriginal = songInfo.videoDetails.title.replace(/\//g, "-");
-        const artist = songInfo.videoDetails.author.name;
-        const thumbnail = songInfo.videoDetails.thumbnails[0].url;
-        const videoId = songInfo.videoDetails.videoId;
-
-        const song = new Song(videoId, songLink, thumbnail, songNameOriginal, artist);
-        const history = new History(song, subUser);
+        const song = await getInfo(songLink);
+        const history = new userSong(song, subUser);
         database.addSongToHistoryUser(history);
 
-        const filePath = path.join(donwloadPath, `${videoId}.mp3`);      
+        const filePath = path.join(donwloadPath, `${song.songId}.mp3`);      
         if (fs.existsSync(filePath)) {
-            sendFile(songNameOriginal,filePath, res);
+            sendFile(song.title,filePath, res);
             return;
         }
 
@@ -76,8 +80,8 @@ async function downloadSong(songLink,subUser ,res) {
         });
 
         const metadata = {
-            title: songNameOriginal,
-            artist: artist,
+            title: song.title,
+            artist: song.artist,
         };
 
         ffmpeg(stream)
@@ -88,7 +92,7 @@ async function downloadSong(songLink,subUser ,res) {
                 '-metadata', `artist=${metadata.artist}`
             ])
             .on('end', ()=>{
-                sendFile(songNameOriginal,filePath, res);
+                sendFile(song.title,filePath, res);
             })
             .on('error', (error) => {
                 console.error(error);
@@ -141,7 +145,7 @@ async function donwloadVideo(videoLink,subUser ,res) {
         const videoId = songInfo.videoDetails.videoId;
 
         const song = new Song(videoId, songLink, thumbnail, songNameOriginal, artist);
-        const history = new History(song, subUser);
+        const history = new userSong(song, subUser);
         database.addSongToHistoryUser(history);
 
         const filePath = path.join(donwloadPath, `${videoId}.mp4`);      
@@ -183,4 +187,4 @@ async function donwloadVideo(videoLink,subUser ,res) {
     }
 }
 
-module.exports = { searchSong, downloadSong, donwloadVideo };
+module.exports = { searchSong, downloadSong, donwloadVideo, getInfo };

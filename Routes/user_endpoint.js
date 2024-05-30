@@ -88,8 +88,10 @@ userRouter.post("/favorites/deleteFavorite", (req,res)=>{
     const songId = req.body.songId;
     const subUser = req.body.subUser;
 
-    database.deleteFavorite(songId,subUser).then(()=>{
+    database.deleteFavoriteBySongId(songId,subUser).then(()=>{
+        console.log("Favorite deleted");
         database.getFavorites(subUser).then((favorites)=>{
+            console.log("Favorites: ",favorites);
             res.send(favorites);
         }).catch((error)=>{
             console.log(error);
@@ -98,7 +100,5 @@ userRouter.post("/favorites/deleteFavorite", (req,res)=>{
         console.log(error);
     });
 });
-
-
 
 module.exports = userRouter;

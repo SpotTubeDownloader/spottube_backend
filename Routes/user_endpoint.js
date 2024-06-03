@@ -2,31 +2,65 @@ const express = require("express")
 const userRouter = express.Router()
 const database = require('../Database/database');
 const userSong = require('../Models/UserSong');
-const { searchSong, downloadSong, getInfo } = require('../utils/youtube');
+//const { searchSong, downloadSong, getInfo } = require('../utils/youtube');
+const youtube = require('../utils/youtube');
 
 userRouter.post('/searchName', (req, res) => {
     const songName = req.body.songName + " original song";
-    searchSong(songName).then((songs) => {
+    youtube.searchSong(songName).then((songs) => {
         res.send(songs);
     });
 });
 userRouter.post("/downloadSongBySongName", (req, res) => {
     const songLink = req.body.songLink;
     const subUser = req.body.sub;
-    downloadSong(songLink,subUser ,res).then(() => {
-        console.log("Song downloaded");
-    }).catch((error) => {
-        console.log(error);
-    });
+
+    const spotifyRegex = /^https:\/\/open\.spotify\.com\/track\/[a-zA-Z0-9]{22}\?si=[a-zA-Z0-9]{16}$/;
+    const youtubeRegex = /^https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[\w-]+$/;
+    try{
+        if (songLink.match(spotifyRegex)) {
+            youtube.DownloadBySpotify(songLink,subUser ,res).then(() => {}).catch((error) => {
+                console.log(error);
+            });
+        }
+        else if(songLink.match(youtubeRegex)){
+            youtube.downloadSong(songLink,subUser ,res).then(() => {
+            }).catch((error) => {
+                console.log(error);
+            });
+        }else{
+            throw new Error('Invalid link');
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.send("Invalid link");
+    }
 });
 
 userRouter.post("/downloadVideoByLink", (req, res) => {
     const videoLink = req.body.videoLink;
     const subUser = req.body.sub;
-    downloadSong(videoLink,subUser ,res).then(() => {
-    }).catch((error) => {
-        console.log(error);
-    });
+
+    const spotifyRegex = /^https:\/\/open\.spotify\.com\/track\/[a-zA-Z0-9]{22}\?si=[a-zA-Z0-9]{16}$/;
+    const youtubeRegex = /^https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[\w-]+$/;
+    try{
+        if (videoLink.match(spotifyRegex)) {
+            youtube.DownloadBySpotify(videoLink,subUser ,res).then(() => {}).catch((error) => {
+                console.log(error);
+            });
+        }
+        else if(videoLink.match(youtubeRegex)){
+            youtube.downloadSong(videoLink,subUser ,res).then(() => {
+            }).catch((error) => {
+                console.log(error);
+            });
+        }else{
+            throw new Error('Invalid link');
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.send("Invalid link");
+    }
 });
 
 userRouter.get("/history/:sub", (req,res)=>{
@@ -102,3 +136,75 @@ userRouter.post("/favorites/deleteFavorite", (req,res)=>{
 });
 
 module.exports = userRouter;
+
+
+
+
+
+userRouter.post("/formSp", async (req, res) => {
+    //Get the song's link of the request
+    const link = req.body.link;
+    // const songName = await getSongName(link);
+    getAccessToken();
+    try {
+      var linkType = recognzieSpotifyLink(link);
+    } catch (error) {
+      console.log(error.message);
+      res.redirect("/formSp");
+    }
+    //Download by song's link
+
+      const songName = await getSongName(link);
+      const songArtist = await getSongArtist(link);
+      var songToSearch = songName + " " + songArtist + " original video";
+      const songLink = await searchSingleSong(songToSearch);
+      const songNameOriginal = (
+        await ytdl.getInfo(songLink)
+      ).videoDetails.title.replace(/\//g, "-");
+      console.log(`SongNameOriginal: ${songNameOriginal}`);
+      console.log(`Link YT: ${songLink}`);
+      res.setHeader(
+        "Content-disposition",
+        "attachment; filename=" + songNameOriginal + ".mp3"
+      );
+      res.setHeader("Content-type", "application/octet-stream");
+      res.attachment(songNameOriginal + ".mp3");
+  
+      const stream = ytdl(songLink, {
+        filter: "audioonly",
+        quality: "highestaudio",
+      });
+      const outputFilePathDown = __dirname + "/" + songNameOriginal + ".mp3";
+      console.log(outputFilePathDown);
+      ffmpeg(stream)
+        .audioCodec("libmp3lame")
+        .format("mp3")
+        .output(outputFilePathDown)
+        .on("end", () => {
+          const metadata = {
+            title: songNameOriginal,
+            artist: songArtist,
+          };
+          console.log("Download and conversion completed!");
+          ffmetadata.write(outputFilePathDown, metadata, function (err) {
+            if (err) {
+              console.error("Error updating metadata:", err);
+            } else {
+              console.log("Metadata updated successfully!");
+            }
+          });
+          setTimeout(() => {
+            res.download(outputFilePathDown);
+          }, 1500);
+        })
+        .on("error", (err) => console.error(err))
+        .save(outputFilePathDown);
+      // setTimeout(() => {
+      //     deleteFile(outputFilePathDown);
+      //     console.log('File deleted');
+      // }, 5000);
+      res.on("finish", () => {
+        deleteFile(outputFilePathDown);
+        console.log("File deleted");
+      });
+  });

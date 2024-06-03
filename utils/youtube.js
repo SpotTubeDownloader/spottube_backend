@@ -7,6 +7,7 @@ const ffmetadata = require("ffmetadata");
 const database = require("../Database/database")
 const path = require("path");
 const fs = require("fs");
+const spotify = require('../utils/spotify');
 require('dotenv').config();
 
 
@@ -187,4 +188,18 @@ async function donwloadVideo(videoLink,subUser ,res) {
     }
 }
 
-module.exports = { searchSong, downloadSong, donwloadVideo, getInfo };
+async function DownloadBySpotify(link, subUser ,res){
+    try{
+        console.log("[DownloadBySpotify] res: ", res)
+        songName = await spotify.getSongName(link);
+        artistName = await spotify.getSongArtist(link);
+        console.log("[INFO] Song Name: ", songName);
+        song = (await searchSong(songName + " " + artistName + " Official video"))[0];
+        console.log("[INFO] Song: ", song);
+        await downloadSong(song.link,subUser, res);
+    } catch (error) {
+        throw error;
+    }
+}
+
+module.exports = { searchSong, downloadSong, donwloadVideo, getInfo, DownloadBySpotify };

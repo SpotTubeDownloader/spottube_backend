@@ -29,7 +29,7 @@ async function searchSong(songName) {
                 key: process.env.YOUTUBE_API_KEY,
                 q: songName,
                 part: 'snippet',
-                type: 'video',
+                order: 'relevance', 
                 maxResults: 10
             }
         });

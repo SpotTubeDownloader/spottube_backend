@@ -2,6 +2,7 @@ const express = require("express")
 const userRouter = express.Router()
 const database = require('../Database/database');
 const userSong = require('../Models/UserSong');
+const RatingSite = require('../Models/RatingSite');
 //const { searchSong, downloadSong, getInfo } = require('../utils/youtube');
 const youtube = require('../utils/youtube');
 
@@ -103,7 +104,7 @@ userRouter.post("/favorites/addFavorite", (req,res)=>{
     const videoLink = req.body.videoLink;
     const subUser = req.body.sub;
 
-    getInfo(videoLink).then((song)=>{
+    youtube.getInfo(videoLink).then((song)=>{
         const favorite = new userSong(song, subUser)
         database.addFavorite(favorite).then(()=>{
             database.getFavorites(subUser).then((favorites)=>{
@@ -134,5 +135,31 @@ userRouter.post("/favorites/deleteFavorite", (req,res)=>{
         console.log(error);
     });
 });
+
+userRouter.get("/getRatingByUserSub/:sub", (req,res)=>{
+    const userSub = req.params.sub;
+    database.getRatingByUserSub(userSub).then((rating)=>{
+        res.json({ rating: rating });
+    }).catch((error)=>{
+        console.log(error);
+    });
+});
+
+userRouter.post("/updateRatingByUserSub", (req,res)=>{
+    const userSub = req.body.userSub;
+    const rating = req.body.rating;
+
+    console.log("Rating: ", rating);
+    console.log("UserSub: ", userSub)
+
+    const userRating = new RatingSite(userSub, rating);
+    database.updateRatingByUserSub(userRating).then(()=>{
+        res.send("Rating set");
+    }).catch((error)=>{
+        console.log(error);
+    });
+});
+
+
 
 module.exports = userRouter;

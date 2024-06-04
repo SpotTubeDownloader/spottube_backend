@@ -24,9 +24,15 @@ const userSongSchema = new mongoose.Schema({
     song: songSchema
 });
 
+const userRatingSiteSchema = new mongoose.Schema({
+    userSub: String,
+    rating: Number
+});
+
 const historyModel = mongoose.model('history', userSongSchema);
 const userModel = mongoose.model('users', userSchema);
 const favoriteModel = mongoose.model('favorites', userSongSchema);
+const userRatingSiteModel = mongoose.model('ratings', userRatingSiteSchema);
 
 function connectToDatabase(callback){
     mongoose.connect(connectionString).then(()=>{
@@ -119,8 +125,29 @@ async function deleteFavoriteBySongId(songId,subUser){
     }
 }
 
+async function getRatingByUserSub(userSub){
+    try{
+        const userRating = await userRatingSiteModel.findOne({userSub: userSub});
+        if(!userRating){
+            return 0;
+        }
+        return userRating.rating;
+    } catch (error) {
+        console.log(error);
+    }
+}
 
-
+async function updateRatingByUserSub(userRating){
+    try{
+        await userRatingSiteModel.updateOne(
+            { userSub: userRating.userSub },
+            { $set: { rating: userRating.rating } },
+            { upsert: true }
+        );
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 
 module.exports = {
@@ -132,7 +159,9 @@ module.exports = {
     deleteElementinHistoryBySongId, 
     addFavorite, 
     deleteFavoriteBySongId, 
-    getFavorites
+    getFavorites,
+    getRatingByUserSub,
+    updateRatingByUserSub
 };
 
 

@@ -4,6 +4,12 @@ const cors = require('cors');
 const { auth } = require('express-oauth2-jwt-bearer');
 const loginRouter = require('./Routes/login_endpoint');
 const userRouter = require('./Routes/user_endpoint');
+const historyRouter = require('./Routes/history_endpoint')
+const favoriteRouter = require('./Routes/favorite_endpoint')
+const ratingRouter = require('./Routes/rating_endpoint')
+const songRouter = require('./Routes/song_endpoint')
+
+
 const clearCache = require('./utils/cache');
 
 require('dotenv').config();
@@ -19,7 +25,10 @@ const start = () => {
     app.use(cors());
     app.use(jwtCheck);
     app.use(express.json());
-    app.use('/user', userRouter);
+    app.use('/user/history',historyRouter)
+    app.use('/user/favorite',favoriteRouter)
+    app.use('/user/rating',ratingRouter)
+    app.use('/user/song', songRouter);
     app.use('/', loginRouter);
 
     const port = process.env.PORT;

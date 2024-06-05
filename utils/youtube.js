@@ -1,10 +1,10 @@
-const Song = require('../Models/Song');
-const userSong = require('../Models/UserSong');
+const Song = require('../Models/Song').Song;
+const userSong = require('../Models/UserSong').userSong;
 const axios = require("axios");
 const ytdl = require('ytdl-core');
 const ffmpeg = require("fluent-ffmpeg");
 const ffmetadata = require("ffmetadata");
-const database = require("../Database/database")
+const database = require("../Database/historydb")
 const path = require("path");
 const fs = require("fs");
 const spotify = require('../utils/spotify');
@@ -67,7 +67,7 @@ async function downloadSong(songLink,subUser ,res) {
 
         const song = await getInfo(songLink);
         const history = new userSong(song, subUser);
-        database.addSongToHistoryUser(history);
+        database.addSongToHistoryByUserSub(history);
 
         const filePath = path.join(donwloadPath, `${song.songId}.mp3`);      
         if (fs.existsSync(filePath)) {
@@ -147,7 +147,7 @@ async function donwloadVideo(videoLink,subUser ,res) {
 
         const song = new Song(videoId, songLink, thumbnail, songNameOriginal, artist);
         const history = new userSong(song, subUser);
-        database.addSongToHistoryUser(history);
+        database.addSongToHistoryByUserSub(history);
 
         const filePath = path.join(donwloadPath, `${videoId}.mp4`);      
         if (fs.existsSync(filePath)) {

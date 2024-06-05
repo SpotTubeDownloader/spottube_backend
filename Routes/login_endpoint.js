@@ -1,6 +1,6 @@
 const express = require("express")
 const loginRouter = express.Router()
-const database = require('../Database/database');
+const database = require('../Database/userdb');
 
 loginRouter.post('/login', (req, res) => {
     console.log(req.body);

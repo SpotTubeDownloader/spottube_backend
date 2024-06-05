@@ -1,15 +1,18 @@
 const express = require("express")
-const userRouter = express.Router()
-//const { searchSong, downloadSong, getInfo } = require('../utils/youtube');
+const router = express.Router()
+
 const youtube = require('../utils/youtube');
 
-userRouter.post('/searchByName', (req, res) => {
-    const songName = req.body.songName + " original song";
+router.get('/searchByName/:songName', (req, res) => {
+    console.log("Ciao")
+    const songName = req.params.songName + " original song";
     youtube.searchSong(songName).then((songs) => {
         res.send(songs);
     });
 });
-userRouter.post("/downloadSongByLink", (req, res) => {
+
+
+router.post("/downloadSongByLink", (req, res) => {
     const songLink = req.body.songLink;
     const userSub = req.body.userSub;
 
@@ -35,4 +38,5 @@ userRouter.post("/downloadSongByLink", (req, res) => {
     }
 });
 
-module.exports = userRouter;
+
+module.exports = router;

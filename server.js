@@ -33,7 +33,7 @@ const start = () => {
 
     const port = process.env.PORT;
     const host = process.env.HOST;
-    app.listen(port, host, () => {
+    app.listen(port, "0.0.0.0", () => {
         console.log(`App listening at http://${host}:${port}`);
     });
 }

@@ -7,6 +7,9 @@ router.get('/searchByName/:songName', (req, res) => {
     const songName = req.params.songName + " original song";
     youtube.searchSong(songName).then((songs) => {
         res.send(songs);
+    }).catch((error) => {
+        console.log(error);
+        res.status(500).send("Error");
     });
 });
 
@@ -33,16 +36,22 @@ router.post("/downloadSongByLink", (req, res) => {
         }
     } catch (error) {
         console.log(error.message);
-        res.send("Invalid link");
+        res.status(500).send("Error");
     }
 });
 
 router.get("/streamSong/:songLink", (req, res) => {
-    const songLink = req.params.songLink;
-    // decode url songLink 
-    const link = decodeURIComponent(songLink);
-    console.log("[StreamSong]: ",songLink);
-    youtube.streamSong(songLink, res);
+    try{
+        const songLink = req.params.songLink;
+        // decode url songLink 
+        const link = decodeURIComponent(songLink);
+        console.log("[StreamSong]: ",songLink);
+        youtube.streamSong(songLink, res);
+    }catch(error){
+        console.log(error);
+        res.status(500).send("Error");
+    }
+    
 });
 
 

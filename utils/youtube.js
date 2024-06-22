@@ -16,7 +16,7 @@ async function getInfo(url) {
   const artist = songInfo.videoDetails.author.name;
 
   const thumbnailsArray = songInfo.videoDetails.thumbnails;
-  const thumbnail = thumbnailsArray.find(thumb => thumb.url.includes('maxres')) || thumbnails[0];
+  const thumbnail = thumbnailsArray.find(thumb => thumb.url.includes('maxres')) || thumbnailsArray[thumbnailsArray.length - 1] ;
   const videoId = songInfo.videoDetails.videoId;
   const duration = songInfo.videoDetails.lengthSeconds;
   return new Song(videoId, url, thumbnail.url, songNameOriginal, artist, duration);

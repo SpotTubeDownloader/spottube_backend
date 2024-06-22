@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 
 class Song {
-    constructor(id, link, thumbnailUrl, title, artist) {
+    constructor(id, link, thumbnailUrl, title, artist, duration) {
         this.songId = id;
         this.title = title;
         this.artist = artist;
         this.thumbnail = thumbnailUrl;
         this.link = link;
+        this.duration = duration;
     }
 };
 
@@ -16,7 +17,8 @@ const songSchema = new mongoose.Schema({
     title: String,
     artist: String,
     thumbnail: String,
-    link: String
+    link: String,
+    duration: String
 
 });
 

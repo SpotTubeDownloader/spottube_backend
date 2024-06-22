@@ -8,6 +8,7 @@ const database = require("../Database/historydb");
 const path = require("path");
 const fs = require("fs");
 const spotify = require("../utils/spotify");
+const stream = require('stream');
 require("dotenv").config();
 
 async function getInfo(url) {
@@ -16,8 +17,8 @@ async function getInfo(url) {
   const artist = songInfo.videoDetails.author.name;
   const thumbnail = songInfo.videoDetails.thumbnails[0].url;
   const videoId = songInfo.videoDetails.videoId;
-
-  return new Song(videoId, url, thumbnail, songNameOriginal, artist);
+  const duration = songInfo.videoDetails.lengthSeconds;
+  return new Song(videoId, url, thumbnail, songNameOriginal, artist, duration);
 }
 
 async function searchSong(songName) {
@@ -205,10 +206,56 @@ async function DownloadBySpotify(link, subUser, res) {
   }
 }
 
+
+async function streamSong(songLink, res){
+  try{
+    const songInfo = await getInfo(songLink);
+    const audioStream = ytdl(songLink, {
+      filter: "audioonly",
+      quality: "highestaudio",
+    });
+    res.header("Access-Control-Expose-Headers", "*");
+    res.set({
+      "Content-Type": "audio/mpeg",
+    });
+    res.set("songName", `${encodeURIComponent(songInfo.title)}`);
+    res.set("artist", `${encodeURIComponent(songInfo.artist)}`);
+    res.set("thumbnail", `${songInfo.thumbnail}`);
+    const duration = encodeURIComponent(formatDuration(songInfo.duration));
+    res.set("duration", `${duration}`);
+
+    const passThrough = new stream.PassThrough();
+    ffmpeg(audioStream)
+      .audioCodec('libmp3lame')
+      .format('mp3')
+      .pipe(passThrough);
+
+      passThrough.pipe(res);
+
+  }catch(error){
+    console.error(error);
+    if (!res.headersSent) {
+      res.status(500).send("Errore durante lo streaming della canzone");
+    }
+  }
+
+}
+
+function formatDuration(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  const formattedMinutes = String(minutes).padStart(2, '0');
+  const formattedSeconds = String(remainingSeconds).padStart(2, '0');
+
+  return `${formattedMinutes}:${formattedSeconds}`;
+}
+
 module.exports = {
   searchSong,
   downloadSong,
   donwloadVideo,
   getInfo,
   DownloadBySpotify,
+  streamSong,
 };

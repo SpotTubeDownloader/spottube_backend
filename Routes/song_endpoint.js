@@ -4,7 +4,6 @@ const router = express.Router()
 const youtube = require('../utils/youtube');
 
 router.get('/searchByName/:songName', (req, res) => {
-    console.log("Ciao")
     const songName = req.params.songName + " original song";
     youtube.searchSong(songName).then((songs) => {
         res.send(songs);
@@ -36,6 +35,14 @@ router.post("/downloadSongByLink", (req, res) => {
         console.log(error.message);
         res.send("Invalid link");
     }
+});
+
+router.get("/streamSong/:songLink", (req, res) => {
+    const songLink = req.params.songLink;
+    // decode url songLink 
+    const link = decodeURIComponent(songLink);
+    console.log("[StreamSong]: ",songLink);
+    youtube.streamSong(songLink, res);
 });
 
 

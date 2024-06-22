@@ -8,17 +8,18 @@ const database = require("../Database/historydb");
 const path = require("path");
 const fs = require("fs");
 const spotify = require("../utils/spotify");
-const stream = require('stream');
 require("dotenv").config();
 
 async function getInfo(url) {
   const songInfo = await ytdl.getInfo(url);
   const songNameOriginal = songInfo.videoDetails.title.replace(/\//g, "-");
   const artist = songInfo.videoDetails.author.name;
-  const thumbnail = songInfo.videoDetails.thumbnails[0].url;
+
+  const thumbnailsArray = songInfo.videoDetails.thumbnails;
+  const thumbnail = thumbnailsArray.find(thumb => thumb.url.includes('maxres')) || thumbnails[thumbnails.length - 1];
   const videoId = songInfo.videoDetails.videoId;
   const duration = songInfo.videoDetails.lengthSeconds;
-  return new Song(videoId, url, thumbnail, songNameOriginal, artist, duration);
+  return new Song(videoId, url, thumbnail.url, songNameOriginal, artist, duration);
 }
 
 async function searchSong(songName) {
@@ -210,7 +211,7 @@ async function DownloadBySpotify(link, subUser, res) {
 async function streamSong(songLink, res){
   try{
     const songInfo = await getInfo(songLink);
-    const audioStream = ytdl(songLink, {
+    const stream = ytdl(songLink, {
       filter: "audioonly",
       quality: "highestaudio",
     });
@@ -223,15 +224,8 @@ async function streamSong(songLink, res){
     res.set("thumbnail", `${songInfo.thumbnail}`);
     const duration = encodeURIComponent(formatDuration(songInfo.duration));
     res.set("duration", `${duration}`);
-
-    const passThrough = new stream.PassThrough();
-    ffmpeg(audioStream)
-      .audioCodec('libmp3lame')
-      .format('mp3')
-      .pipe(passThrough);
-
-      passThrough.pipe(res);
-
+    stream.pipe(res);
+    
   }catch(error){
     console.error(error);
     if (!res.headersSent) {

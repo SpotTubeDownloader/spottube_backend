@@ -18,11 +18,13 @@ router.post("/downloadSongByLink", (req, res) => {
     const songLink = req.body.songLink;
     const userSub = req.body.userSub;
 
-    const spotifyRegex = /^https:\/\/open\.spotify\.com\/track\/[a-zA-Z0-9]{22}\?si=[a-zA-Z0-9]{16}$/;
+    const spotifyRegex =/^https:\/\/open\.spotify\.com(\/intl-[a-z]{2})?\/track\/[a-zA-Z0-9]{22}\?si=[a-zA-Z0-9_-]{16,32}$/;
+    const intlSpotifyRegex = /\/intl-[a-z]{2}/;
     const youtubeRegex = /^https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[\w-]+$/;
     try{
         if (songLink.match(spotifyRegex)) {
-            youtube.DownloadBySpotify(songLink,userSub ,res).then(() => {}).catch((error) => {
+            spotLink = songLink.replace(intlSpotifyRegex, '');
+            youtube.DownloadBySpotify(spotLink,userSub ,res).then(() => {}).catch((error) => {
                 console.log(error);
             });
         }

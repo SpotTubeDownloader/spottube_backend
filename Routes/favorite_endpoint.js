@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const favoritedb = require('../Database/favoritedb');   
 const youtube = require('../utils/youtube');
-const userSong = require('../Models/UserSong').userSong;
 
 
 
@@ -21,8 +20,7 @@ router.post("/addFavoriteByUserSub", (req,res)=>{
     const userSub = req.body.userSub;
 
     youtube.getInfo(videoLink).then((song)=>{
-        const favorite = new userSong(song, userSub)
-        favoritedb.addFavoriteByUserSub(favorite).then(()=>{
+        favoritedb.addFavoriteByUserSub(song,userSub).then(()=>{
             favoritedb.getFavoritesByUserSub(userSub).then((favorites)=>{
                 res.send(favorites);
             }).catch((error)=>{

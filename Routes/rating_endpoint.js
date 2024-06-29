@@ -1,7 +1,6 @@
 const express = require("express")
 const router = express.Router()
 const ratingdb = require('../Database/ratingdb');
-const RatingSite = require('../Models/RatingSite').RatingSite;
 
 
 router.get("/getRatingByUserSub/:sub", (req,res)=>{
@@ -17,8 +16,7 @@ router.get("/getRatingByUserSub/:sub", (req,res)=>{
 router.post("/updateRatingByUserSub", (req,res)=>{
     const userSub = req.body.userSub;
     const rating = req.body.rating;
-    const userRating = new RatingSite(userSub, rating);
-    ratingdb.updateRatingByUserSub(userRating).then(()=>{
+    ratingdb.updateRatingByUserSub(userSub, rating).then(()=>{
         res.send("Rating set");
     }).catch((error)=>{
         console.log(error);

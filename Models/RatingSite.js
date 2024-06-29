@@ -1,18 +1,10 @@
 const mongoose = require('mongoose');
 
-class RatingSite{
-    constructor(userSub, rating){
-        this.userSub = userSub;
-        this.rating = rating;
-    }
-}
-
 const userRatingSiteSchema = new mongoose.Schema({
-    userSub: String,
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
     rating: Number
 });
 
 const userRatingSiteModel = mongoose.model('ratings', userRatingSiteSchema);
 
-
-module.exports = { RatingSite, userRatingSiteModel, userRatingSiteSchema};
+module.exports = {userRatingSiteModel, userRatingSiteSchema};

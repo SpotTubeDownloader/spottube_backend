@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
     name: String,
     nickname: String,
     picture: String,
-    userSub: String
+    userSub: {type: String, unique: true}
 });
 
 const userModel = mongoose.model('users', userSchema);

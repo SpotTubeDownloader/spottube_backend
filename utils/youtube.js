@@ -1,5 +1,4 @@
 const Song = require("../Models/Song").Song;
-const userSong = require("../Models/UserSong").userSong;
 const axios = require("axios");
 const ytdl = require("ytdl-core");
 const ffmpeg = require("fluent-ffmpeg");
@@ -58,7 +57,7 @@ async function searchSong(songName) {
   }
   return songsList;
 }
-async function downloadSong(songLink, subUser, res) {
+async function downloadSong(songLink, userSub, res) {
   try {
     donwloadPath = process.env.CACHE_DIR;
 
@@ -67,8 +66,7 @@ async function downloadSong(songLink, subUser, res) {
     }
 
     const song = await getInfo(songLink);
-    const history = new userSong(song, subUser);
-    database.addSongToHistoryByUserSub(history);
+    database.addSongToHistoryByUserSub(song, userSub);
 
     const filePath = path.join(donwloadPath, `${song.songId}.mp3`);
     if (fs.existsSync(filePath)) {
@@ -109,6 +107,10 @@ async function downloadSong(songLink, subUser, res) {
     }
   }
 }
+
+
+
+
 
 function sendFile(songName, filePath, res) {
   res.header("Access-Control-Expose-Headers", "*");

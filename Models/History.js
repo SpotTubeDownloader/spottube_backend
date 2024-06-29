@@ -1,8 +1,13 @@
 const mongoose = require('mongoose');
+const songSchema = require('./Song').songSchema;
 
-const userSongSchema = require('./UserSong').userSongSchema;
 
-const historyModel = mongoose.model('history', userSongSchema);
+const historySchema = new mongoose.Schema({
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
+    songs: [songSchema]
+});
 
-module.exports = { historyModel };
+const historyModel = mongoose.model('histories', historySchema);
+
+module.exports = { historyModel, historySchema };
 

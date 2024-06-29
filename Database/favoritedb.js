@@ -1,25 +1,38 @@
 const mongoose = require('mongoose');
 const favoriteModel = require('../Models/Favorite').favoriteModel;
+const { getUserBySub } = require('./userdb');
+
 
 async function getFavoritesByUserSub(userSub){
     try{
-        favorites = await favoriteModel.find({userSub: userSub});
-        const songs = favorites.map(element => element.song).reverse();
-        return songs;
+        const user = await getUserBySub(userSub);
+        let favorites = await favoriteModel.findOne({user: user._id});
+        const songs = favorites.songs;
+        return songs.reverse();
     } catch (error) {
         console.log(error);
     }
 }
 
-async function addFavoriteByUserSub(favorite){
+async function addFavoriteByUserSub(song, userSub){
     try{
-        const newFavorite = new favoriteModel(favorite);
-        favorite = await favoriteModel.findOne({userSub: favorite.userSub, 'song.songId': favorite.song.songId});
-        if (!favorite){
-            await newFavorite.save();
-            return true;
+        const user = await getUserBySub(userSub);
+        if (!user) {
+            throw new Error('User not found');
         }
-        return false;
+
+        let favorites = await favoriteModel.findOne({user: user._id});
+
+        if (!favorites) {
+            favorites = new favoriteModel({ user: user._id, songs: [] });
+            favorites.songs.push(song);
+            await favorites.save();
+            return;
+        }
+
+        favorites.songs = favorites.songs.filter(s => s.songId !== song.songId);
+        favorites.songs.push(song);
+        await favorites.save();
     } catch (error){
         console.log(error);
         return false;

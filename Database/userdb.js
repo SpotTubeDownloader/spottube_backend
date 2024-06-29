@@ -2,7 +2,7 @@ const userModel = require('../Models/User').userModel;
 
 async function getUserBySub(userSub){
     try{
-        const user = await userModel.findOne({sub: userSub});
+        const user = await userModel.findOne({userSub: userSub});
         return user;
     } catch (error) {
         console.log(error);

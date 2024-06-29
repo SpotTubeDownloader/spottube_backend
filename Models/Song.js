@@ -13,7 +13,7 @@ class Song {
 
 
 const songSchema = new mongoose.Schema({
-    songId: String,
+    songId: {type: String, unique: true},
     title: String,
     artist: String,
     thumbnail: String,

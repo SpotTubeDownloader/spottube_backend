@@ -1,9 +1,16 @@
 const mongoose = require('mongoose');
 const userRatingSiteModel = require('../Models/RatingSite').userRatingSiteModel;
+const { getUserBySub } = require('./userdb');
+
 
 async function getRatingByUserSub(userSub){
     try{
-        const userRating = await userRatingSiteModel.findOne({userSub: userSub});
+        const user = await getUserBySub(userSub);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        const userRating = await userRatingSiteModel.findOne({user: user._id});
         if(!userRating){
             return 0;
         }
@@ -13,11 +20,16 @@ async function getRatingByUserSub(userSub){
     }
 }
 
-async function updateRatingByUserSub(userRating){
+async function updateRatingByUserSub(userSub,rating){
     try{
+        const user = await getUserBySub(userSub);
+        if (!user) {
+            throw new Error('User not found');
+        }
+
         await userRatingSiteModel.updateOne(
-            { userSub: userRating.userSub },
-            { $set: { rating: userRating.rating } },
+            { user: user._id},
+            { $set: { rating: rating } },
             { upsert: true }
         );
     } catch (error) {

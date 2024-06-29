@@ -4,8 +4,8 @@ const database = require('../Database/userdb');
 
 loginRouter.post('/login', (req, res) => {
     console.log(req.body);
-    database.getUserBySub(req.body.sub).then((exists)=>{
-        // console.log(exists)
+    database.getUserBySub(req.body.userSub).then((exists)=>{
+        // console.log(exists)userSub
         if (!exists){
             database.addUser(req.body)
         }

@@ -85,7 +85,7 @@ async function downloadSong(songLink, userSub, res) {
     };
 
     ffmpeg(stream)
-      .audioBitrate(128)
+      .audioBitrate(320)
       .save(filePath)
       .outputOptions([
         "-metadata",
@@ -108,10 +108,6 @@ async function downloadSong(songLink, userSub, res) {
   }
 }
 
-
-
-
-
 function sendFile(songName, filePath, res) {
   res.header("Access-Control-Expose-Headers", "*");
   res.set({
@@ -130,68 +126,6 @@ function sendFile(songName, filePath, res) {
   });
 }
 
-async function donwloadVideo(videoLink, subUser, res) {
-  try {
-    donwloadPath = process.env.CACHE_DIR;
-
-    if (!fs.existsSync(donwloadPath)) {
-      fs.mkdirSync(donwloadPath, { recursive: true });
-    }
-
-    const videoInfo = await ytdl.getInfo(songLink);
-    const videoNameOriginal = songInfo.videoDetails.title.replace(/\//g, "-");
-    const artist = songInfo.videoDetails.author.name;
-    const thumbnail = songInfo.videoDetails.thumbnails[0].url;
-    const videoId = songInfo.videoDetails.videoId;
-
-    const song = new Song(
-      videoId,
-      songLink,
-      thumbnail,
-      songNameOriginal,
-      artist
-    );
-    const history = new userSong(song, subUser);
-    database.addSongToHistoryByUserSub(history);
-
-    const filePath = path.join(donwloadPath, `${videoId}.mp4`);
-    if (fs.existsSync(filePath)) {
-      sendFile(videoNameOriginal, filePath, res);
-      return;
-    }
-
-    const stream = ytdl(songLink, {
-      quality: "highestvideo",
-    });
-
-    const metadata = {
-      title: videoNameOriginal,
-      artist: artist,
-    };
-
-    ffmpeg(stream)
-      .videoBitrate(1024)
-      .save(filePath)
-      .outputOptions([
-        "-metadata",
-        `title=${metadata.title}`,
-        "-metadata",
-        `artist=${metadata.artist}`,
-      ])
-      .on("end", () => {
-        sendFile(videoNameOriginal, filePath, res);
-      })
-      .on("error", (error) => {
-        console.error(error);
-        res.status(500).send("Errore durante la conversione in mp4");
-      });
-  } catch (error) {
-    console.error(error);
-    if (!res.headersSent) {
-      res.status(500).send("Errore durante il download del video");
-    }
-  }
-}
 
 async function DownloadBySpotify(link, subUser, res) {
   try {
@@ -211,27 +145,63 @@ async function DownloadBySpotify(link, subUser, res) {
 
 
 async function streamSong(songLink, res){
-  try{
-    const songInfo = await getInfo(songLink);
-    const stream = ytdl(songLink, {
-      filter: "audioonly",
-      quality: "highestaudio",
-    });
+  try {
+    donwloadPath = process.env.CACHE_DIR;
+
+    if (!fs.existsSync(donwloadPath)) {
+      fs.mkdirSync(donwloadPath, { recursive: true });
+    }
+
+    const song = await getInfo(songLink);
+
     res.header("Access-Control-Expose-Headers", "*");
     res.set({
       "Content-Type": "audio/mpeg",
     });
-    res.set("songName", `${encodeURIComponent(songInfo.title)}`);
-    res.set("artist", `${encodeURIComponent(songInfo.artist)}`);
-    res.set("thumbnail", `${songInfo.thumbnail}`);
-    const duration = encodeURIComponent(formatDuration(songInfo.duration));
+    res.set("songName", `${encodeURIComponent(song.title)}`);
+    res.set("artist", `${encodeURIComponent(song.artist)}`);
+    res.set("thumbnail", `${song.thumbnail}`);
+    const duration = encodeURIComponent(formatDuration(song.duration));
     res.set("duration", `${duration}`);
-    stream.pipe(res);
-    
-  }catch(error){
+
+
+
+    const filePath = path.join(donwloadPath, `${song.songId}.mp3`);
+    if (fs.existsSync(filePath)) {
+      sendFile(song.title, filePath, res);
+      return;
+    }
+
+    const stream = ytdl(songLink, {
+      filter: "audioonly",
+      quality: "highestaudio",
+    });
+
+    const metadata = {
+      title: song.title,
+      artist: song.artist,
+    };
+
+    ffmpeg(stream)
+      .audioBitrate(320)
+      .save(filePath)
+      .outputOptions([
+        "-metadata",
+        `title=${metadata.title}`,
+        "-metadata",
+        `artist=${metadata.artist}`,
+      ])
+      .on("end", () => {
+        sendFile(song.title, filePath, res);
+      })
+      .on("error", (error) => {
+        console.error(error);
+        res.status(500).send("Errore durante la conversione in mp3");
+      });
+  } catch (error) {
     console.error(error);
     if (!res.headersSent) {
-      res.status(500).send("Errore durante lo streaming della canzone");
+      res.status(500).send("Errore durante il download della canzone");
     }
   }
 
@@ -250,7 +220,6 @@ function formatDuration(seconds) {
 module.exports = {
   searchSong,
   downloadSong,
-  donwloadVideo,
   getInfo,
   DownloadBySpotify,
   streamSong,

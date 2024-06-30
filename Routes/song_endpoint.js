@@ -47,7 +47,6 @@ router.get("/streamSong/:songLink", (req, res) => {
         const songLink = req.params.songLink;
         // decode url songLink 
         const link = decodeURIComponent(songLink);
-        console.log("[StreamSong]: ",songLink);
         youtube.streamSong(songLink, res);
     }catch(error){
         console.log(error);

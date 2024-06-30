@@ -41,7 +41,13 @@ async function addFavoriteByUserSub(song, userSub){
 
 async function deleteFavoriteBySongId(songId,userSub){
     try{
-        await favoriteModel.deleteOne({userSub: userSub, 'song.songId': songId});
+        const user = await getUserBySub(userSub);
+        if (!user) {
+            throw new Error('User not found');
+        }
+        let favorite = await favoriteModel.findOne({user: user._id});
+        favorite.songs = favorite.songs.filter(s => s.songId !== songId);
+        await favorite.save();    
     } catch (error) {
         console.log(error);
     }

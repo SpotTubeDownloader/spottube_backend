@@ -20,7 +20,7 @@ router.post("/downloadSongByLink", (req, res) => {
 
     const spotifyRegex =/^https:\/\/open\.spotify\.com(\/intl-[a-z]{2})?\/track\/[a-zA-Z0-9]{22}\?si=[a-zA-Z0-9_-]{16,32}$/;
     const intlSpotifyRegex = /\/intl-[a-z]{2}/;
-    const youtubeRegex = /^https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[\w-]+$/;
+    const youtubeRegex = /^https?:\/\/(?:www\.)?youtube\.com\/watch\?v=[\w-]+(?:&[\w-]+=[\w-]+)*$/;
     try{
         if (songLink.match(spotifyRegex)) {
             spotLink = songLink.replace(intlSpotifyRegex, '');

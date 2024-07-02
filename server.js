@@ -3,7 +3,6 @@ const {connectToDatabase, getUser, addUser} = require('./Database/database');
 const cors = require('cors');
 const { auth } = require('express-oauth2-jwt-bearer');
 const loginRouter = require('./Routes/login_endpoint');
-const userRouter = require('./Routes/user_endpoint');
 const historyRouter = require('./Routes/history_endpoint')
 const favoriteRouter = require('./Routes/favorite_endpoint')
 const ratingRouter = require('./Routes/rating_endpoint')
@@ -15,6 +14,7 @@ const clearCache = require('./utils/cache');
 require('dotenv').config();
 
 const start = () => {
+    // protegge gli endpoint
     const jwtCheck = auth({
         audience: 'spottube-certificate',
         issuerBaseURL: 'https://dev-tq8wvm3avqr1gqu6.us.auth0.com/',
@@ -33,10 +33,10 @@ const start = () => {
 
     const port = process.env.PORT;
     const host = process.env.HOST;
-    app.listen(port, "0.0.0.0", () => {
+    app.listen(port, host, () => {
         console.log(`App listening at http://${host}:${port}`);
     });
 }
 
-setInterval(clearCache, 1000*60*60);
-connectToDatabase(start);
+setInterval(clearCache, 1000*60*60); // svuota la cache ogni ora
+connectToDatabase(start); // avvia il server solo se connesso al db

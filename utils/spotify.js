@@ -26,13 +26,11 @@ async function getAccessToken() {
     }
 };
 
-
-//function to get the song name frome the spotify's link
+// prendiamo il nome della canzone da spotify
 async function getSongName(link) {
     try{
         let songId = link.split('/')[4];
         songId = songId.split('?')[0];
-        console.log("[INFO]: SongID ",songId);
         const accessToken = await getAccessToken();
         console.log("[INFO]: Access Token ",accessToken);   
         const response = await axios.get(`https://api.spotify.com/v1/tracks/${songId}`, {

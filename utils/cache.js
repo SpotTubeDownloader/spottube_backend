@@ -1,6 +1,6 @@
 const fs = require('fs-extra');
 
-
+// Funzione che pulisce la cache
 clearCache = async() =>{
     cacheDir = process.env.CACHE_DIR;
 

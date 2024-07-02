@@ -1,18 +1,19 @@
 const userModel = require('../Models/User').userModel;
 
+// Chiamata a mongoose per cercare l'utente con userSub
 async function getUserBySub(userSub){
     try{
-        const user = await userModel.findOne({userSub: userSub});
+        const user = await userModel.findOne({userSub: userSub}); // cerca l'utente con userSub
         return user;
     } catch (error) {
         console.log(error);
     }
 }
 
-//create add user function using the userModel and user object
+// Crea un nuovo user model con i dati e lo salva nel database
 async function addUser(user){
     try{
-        const newUser = new userModel(user);
+        const newUser = new userModel(user); // crea un nuovo user
         await newUser.save();
     } catch (error) {
         console.log(error);
